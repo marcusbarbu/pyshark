@@ -14,7 +14,7 @@ class Packet(Pickleable):
     """
 
     def __init__(self, layers=None, frame_info=None, number=None,
-                 length=None, captured_length=None, sniff_time=None, interface_captured=None):
+                 length=None, captured_length=None, sniff_time=None, interface_captured=None, xml = None):
         """
         Creates a Packet object with the given layers and info.
 
@@ -24,6 +24,7 @@ class Packet(Pickleable):
         :param captured_length: The length of the packet that was actually captured (could be less then length)
         :param sniff_time: The time the packet was captured (timestamp)
         :param interface_captured: The interface the packet was captured in.
+	:param xml: The raw XML for this packet
         """
         if layers is None:
             self.layers = []
@@ -35,6 +36,7 @@ class Packet(Pickleable):
         self.captured_length = captured_length
         self.length = length
         self.sniff_timestamp = sniff_time
+	self.xml = xml
 
     def __getitem__(self, item):
         """

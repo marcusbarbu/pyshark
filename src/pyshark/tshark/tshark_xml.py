@@ -13,7 +13,7 @@ def psml_structure_from_xml(psml_structure):
     return psml_structure.findall('section')
 
 
-def packet_from_xml_packet(xml_pkt, psml_structure=None):
+def packet_from_xml_packet(xml, psml_structure=None):
     """
     Gets a TShark XML packet object or string, and returns a pyshark Packet objec.t
 
@@ -22,22 +22,24 @@ def packet_from_xml_packet(xml_pkt, psml_structure=None):
     be returned as a PacketSummary object.
     :return: Packet object.
     """
-    if not isinstance(xml_pkt, lxml.objectify.ObjectifiedElement):
+    if not isinstance(xml, lxml.objectify.ObjectifiedElement):
         parser = lxml.objectify.makeparser(huge_tree=True)
-        xml_pkt = lxml.objectify.fromstring(xml_pkt, parser)
+        xml_pkt = lxml.objectify.fromstring(xml, parser)
+    else:
+	xml_pkt = xml
     if psml_structure:
         return _packet_from_psml_packet(xml_pkt, psml_structure)
-    return _packet_from_pdml_packet(xml_pkt)
+    return _packet_from_pdml_packet(xml_pkt, xml)
 
 
 def _packet_from_psml_packet(psml_packet, structure):
     return PacketSummary(structure, psml_packet.findall('section'))
 
 
-def _packet_from_pdml_packet(pdml_packet):
+def _packet_from_pdml_packet(pdml_packet, xml=None):
     layers = [Layer(proto) for proto in pdml_packet.proto]
     geninfo, frame, layers = layers[0], layers[1], layers[2:]
     return Packet(layers=layers, frame_info=frame, number=geninfo.get_field_value('num'),
                   length=geninfo.get_field_value('len'), sniff_time=geninfo.get_field_value('timestamp', raw=True),
                   captured_length=geninfo.get_field_value('caplen'),
-                  interface_captured=frame.get_field_value('interface_id', raw=True))
+                  interface_captured=frame.get_field_value('interface_id', raw=True), xml = xml)
